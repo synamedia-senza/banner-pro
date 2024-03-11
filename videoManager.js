@@ -2,20 +2,9 @@ import { remotePlayer, lifecycle } from "@Synamedia/hs-sdk";
 
 class VideoManager {
 
-  // localPlayer;
-  
-  media() {
-    return this.localPlayer.getMediaElement();
-  }
-  
   init(player) {
     this.localPlayer = player;
  
-    console.log("init(player)");
-    console.log(player);
-    console.log("this.localPlayer");
-    console.log(this.localPlayer);
-    
     remotePlayer.addEventListener("timeupdate", () => {
       this.media().currentTime = remotePlayer.currentTime || 0;
     });
@@ -40,6 +29,10 @@ class VideoManager {
     } catch (error) {
       console.log("Couldn't load remote player.");
     }
+  }
+  
+  media() {
+    return this.localPlayer.getMediaElement();
   }
   
   play() {
