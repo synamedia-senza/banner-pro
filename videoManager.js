@@ -4,6 +4,7 @@ class VideoManager {
 
   init(player) {
     this.localPlayer = player;
+    this.remotePlayer = remotePlayer;
  
     remotePlayer.addEventListener("timeupdate", () => {
       this.media().currentTime = remotePlayer.currentTime || 0;
@@ -21,7 +22,7 @@ class VideoManager {
       }
     });
   }
-  
+
   async load(url) {
     await this.localPlayer.load(url);
     try {
@@ -62,11 +63,6 @@ class VideoManager {
   }
 
   moveToBackground() {
-    console.log("this.localPlayer");
-    console.log(this.localPlayer);
-    console.log("this.media()");
-    console.log(this.media());
-
     let currentTime = this.media().currentTime;
     remotePlayer.currentTime = currentTime;
     remotePlayer.play();
