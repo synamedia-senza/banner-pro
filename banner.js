@@ -3,7 +3,6 @@ import { videoManager } from "./videoManager.js";
 import shaka from "shaka-player";
 
 const TEST_VIDEO = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
-const MUTE = true;
 
 window.addEventListener("load", async () => {
   try {
