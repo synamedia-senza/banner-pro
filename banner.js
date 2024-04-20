@@ -1,4 +1,4 @@
-import { init, uiReady, lifecycle } from "@Synamedia/hs-sdk";
+import { init, uiReady } from "@Synamedia/hs-sdk";
 import { videoManager } from "./videoManager.js";
 import shaka from "shaka-player";
 
