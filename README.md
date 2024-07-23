@@ -9,6 +9,6 @@ See the [Playing Video](https://developer.synamedia.com/senza/docs/playing-video
 ```bash
 npm install
 npm ci
-npx webpack --config webpack.config.js
+npx webpack -w --config webpack.config.js
 open index.html
 ```

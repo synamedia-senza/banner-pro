@@ -7,10 +7,11 @@ const TEST_VIDEO = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
 window.addEventListener("load", async () => {
   try {
     await init();
-    videoManager.init(new shaka.Player(video));
+    let player = new shaka.Player(video);
+    videoManager.init(video, player);
+    uiReady();
     await videoManager.load(TEST_VIDEO);
     videoManager.play();
-    uiReady();
   } catch (error) {
     console.error(error);
   }

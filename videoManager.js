@@ -2,12 +2,15 @@ import { remotePlayer, lifecycle } from "senza-sdk";
 
 class VideoManager {
 
-  init(player) {
+  init(media, player) {
+    this.media = media;
     this.localPlayer = player;
     this.remotePlayer = remotePlayer;
  
+    remotePlayer.registerVideoElement(this.media);
+
     remotePlayer.addEventListener("timeupdate", () => {
-      this.media().currentTime = remotePlayer.currentTime || 0;
+      this.media.currentTime = remotePlayer.currentTime || 0;
     });
 
     remotePlayer.addEventListener("ended", () => {
@@ -26,28 +29,26 @@ class VideoManager {
   async load(url) {
     await this.localPlayer.load(url);
     try {
-      await remotePlayer.load(url);
+      await remotePlayer.load(url, 0);
     } catch (error) {
       console.log("Couldn't load remote player.");
     }
   }
   
-  media() {
-    return this.localPlayer.getMediaElement();
-  }
-  
   play() {
-    this.media().play().catch(error => {
+    this.media.play().catch(error => {
       console.log("Unable to play video. Possibly the browser will not autoplay video with sound.");
     });
+    remotePlayer.play(false);
   }
   
   pause() {
-    this.media().pause();
+    this.media.pause();
+    remotePlayer.pause();
   }
   
   playPause() {
-    if (this.media().paused) {
+    if (this.media.paused) {
       this.play();
     } else {
       this.pause();
@@ -55,7 +56,9 @@ class VideoManager {
   }
   
   skip(seconds) {
-    this.media().currentTime = this.media().currentTime + seconds;
+    let newTime = this.media.currentTime + seconds;
+    this.media.currentTime = newTime;
+    remotePlayer.currentTime = newTime;
   }
 
   moveToForeground() {
@@ -63,9 +66,10 @@ class VideoManager {
   }
 
   moveToBackground() {
-    let currentTime = this.media().currentTime;
-    remotePlayer.currentTime = currentTime;
-    remotePlayer.play();
+    // let currentTime = this.media.currentTime;
+    // remotePlayer.currentTime = currentTime;
+    // remotePlayer.play();
+    lifecycle.moveToBackground();
   }
   
   async toggleBackground() {
