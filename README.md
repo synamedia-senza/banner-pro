@@ -7,7 +7,6 @@ See the [Playing Video](https://developer.synamedia.com/senza/docs/playing-video
 ## Build
 
 ```bash
-npm install
 npm ci
 npx webpack --config webpack.config.js
 open index.html
