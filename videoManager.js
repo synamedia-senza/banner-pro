@@ -5,7 +5,7 @@ class VideoManager {
   init(player) {
     this.localPlayer = player;
     this.remotePlayer = remotePlayer;
- 
+
     remotePlayer.addEventListener("timeupdate", () => {
       this.media().currentTime = remotePlayer.currentTime || 0;
     });
@@ -13,7 +13,6 @@ class VideoManager {
     remotePlayer.addEventListener("ended", () => {
       lifecycle.moveToForeground();
     });
-
     lifecycle.addEventListener("onstatechange", (event) => {
       if (event.state === "background") {
         this.pause();
@@ -31,21 +30,22 @@ class VideoManager {
       console.log("Couldn't load remote player.");
     }
   }
-  
+
   media() {
     return this.localPlayer.getMediaElement();
   }
-  
+
   play() {
     this.media().play().catch(error => {
       console.log("Unable to play video. Possibly the browser will not autoplay video with sound.");
     });
+    remotePlayer.play(false)
   }
-  
+
   pause() {
     this.media().pause();
   }
-  
+
   playPause() {
     if (this.media().paused) {
       this.play();
@@ -53,7 +53,7 @@ class VideoManager {
       this.pause();
     }
   }
-  
+
   skip(seconds) {
     this.media().currentTime = this.media().currentTime + seconds;
   }
@@ -65,9 +65,9 @@ class VideoManager {
   moveToBackground() {
     let currentTime = this.media().currentTime;
     remotePlayer.currentTime = currentTime;
-    remotePlayer.play();
+    lifecycle.moveToBackground()
   }
-  
+
   async toggleBackground() {
     const currentState = await lifecycle.getState();
     if (currentState == "background" || currentState == "inTransitionToBackground") {
