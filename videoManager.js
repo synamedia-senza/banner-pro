@@ -14,6 +14,10 @@ class VideoManager {
       lifecycle.moveToForeground();
     });
 
+    remotePlayer.addEventListener("error", (event) => {
+      console.error("remoteplayer error:", event.detail.errorCode, event.detail.message);
+    });
+
     lifecycle.addEventListener("onstatechange", (event) => {
       if (event.state === "background") {
         this.pause();
