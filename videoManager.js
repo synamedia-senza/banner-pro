@@ -15,7 +15,7 @@ class VideoManager {
     });
 
     remotePlayer.addEventListener("error", (event) => {
-      console.error("remoteplayer error:", event.detail.errorCode, event.detail.message);
+      console.error("remotePlayer error:", event.detail.errorCode, event.detail.message);
     });
 
     lifecycle.addEventListener("onstatechange", (event) => {
