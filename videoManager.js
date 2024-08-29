@@ -1,83 +1,107 @@
 import { remotePlayer, lifecycle } from "senza-sdk";
+import shaka from "shaka-player";
 
 class VideoManager {
 
-  init(player) {
-    this.localPlayer = player;
+  init(videoElement) {
+    this.localPlayer = new shaka.Player(videoElement);
     this.remotePlayer = remotePlayer;
- 
-    remotePlayer.addEventListener("timeupdate", () => {
-      this.media().currentTime = remotePlayer.currentTime || 0;
-    });
+
+    this.remotePlayer.registerVideoElement(videoElement);
 
     remotePlayer.addEventListener("ended", () => {
       lifecycle.moveToForeground();
     });
 
-    remotePlayer.addEventListener("error", (event) => {
-      console.error("remotePlayer error:", event.detail.errorCode, event.detail.message);
-    });
-
     lifecycle.addEventListener("onstatechange", (event) => {
       if (event.state === "background") {
-        this.pause();
-      } else if (event.state === "foreground") {
-        this.play();
+        this.localPlayerPause();
       }
     });
   }
 
   async load(url) {
-    await this.localPlayer.load(url);
     try {
-      await remotePlayer.load(url);
+      await this.localPlayerLoad(url);
+      await this.remotePlayerLoad(url);
     } catch (error) {
-      console.log("Couldn't load remote player.");
+      console.log("Couldn't load.");
     }
   }
-  
-  media() {
-    return this.localPlayer.getMediaElement();
-  }
-  
+
   play() {
-    this.media().play().catch(error => {
-      console.log("Unable to play video. Possibly the browser will not autoplay video with sound.");
-    });
+    this.localPlayerPlay();
+    this.remotePlayerPlay();
   }
-  
+
   pause() {
-    this.media().pause();
+    this.localPlayerPause();
+    this.remotePlayerPause();
   }
-  
-  playPause() {
-    if (this.media().paused) {
+
+  togglePlayPause() {
+    if (this.localPlayerMedia().paused) {
       this.play();
     } else {
       this.pause();
     }
   }
-  
-  skip(seconds) {
-    this.media().currentTime = this.media().currentTime + seconds;
+
+  seek(seconds) {
+    // Seek API Not implemented
+    // remotePlayer.currentTime sould be a setter
+    remotePlayer.currentTime = this.localPlayerMedia().currentTime = this.localPlayerMedia().currentTime + seconds;
+    remotePlayer.play(false);
   }
 
-  moveToForeground() {
+  localPlayerLoad(url) {
+    return this.localPlayer.load(url);
+  }
+
+  localPlayerMedia() {
+    return this.localPlayer.getMediaElement();
+  }
+
+  localPlayerPlay() {
+    this.localPlayerMedia().play().catch(error => {
+      console.log("Unable to play video. Possibly the browser will not autoplay video with sound.");
+    });
+  }
+
+  localPlayerPause() {
+    this.localPlayerMedia().pause();
+  }
+
+  remotePlayerLoad(url) {
+    return remotePlayer.load(url);
+  }
+
+  remotePlayerPlay() {
+    remotePlayer.play(false);
+  }
+
+  remotePlayerPause() {
+    remotePlayer.pause();
+  }
+
+  async moveToLocalPlayer() {
+    this.localPlayerMedia().currentTime = remotePlayer.currentTime || 0;
+    this.localPlayerPlay();
     lifecycle.moveToForeground();
   }
 
-  moveToBackground() {
-    let currentTime = this.media().currentTime;
+  moveToRemotePlayer() {
+    let currentTime = this.localPlayerMedia().currentTime;
     remotePlayer.currentTime = currentTime;
-    remotePlayer.play();
+    lifecycle.moveToBackground();
   }
-  
-  async toggleBackground() {
+
+  async togglePlayers() {
     const currentState = await lifecycle.getState();
     if (currentState == "background" || currentState == "inTransitionToBackground") {
-      lifecycle.moveToForeground();
+      this.moveToLocalPlayer();
     } else {
-      this.moveToBackground();
+      this.moveToRemotePlayer();
     }
   }
 }
