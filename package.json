@@ -1,6 +1,6 @@
 {
   "name": "banner",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "",
   "main": "banner.js",
   "author": "",
@@ -10,7 +10,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "senza-sdk": "^3.20.6",
-    "shaka-player": "^3.2.9"
+    "senza-sdk": "^4.2.2-00c76af.0",
+    "shaka-player": "^4.12.5"
   }
 }
