@@ -11,14 +11,13 @@ class LifecycleAdditions {
     this._autoBackgroundDelay = 30;
 
     document.addEventListener("keydown", () => {
-      if (this._autoBackground) {
+      if (this.autoBackground) {
         if (lifecycle.state === lifecycle.UiState.BACKGROUND || 
-            lifecycle.state === lifecycle.UiState.IN_TRANSITION_TO_BACKGROUND) {
+            lifecycle.state === lifecycle.UiState.IN_TRANSITION_TO_BACKGROUND) 
+        {
           lifecycle.moveToForeground();
         } else {
-          if (this.autoBackground) {
-            this.startCountdown();
-          }
+          this.startCountdown();
         }
       }
     });
@@ -42,7 +41,7 @@ class LifecycleAdditions {
   set autoBackground(value) {
     this._autoBackground = value;
     
-    if (this._autoBackground) {
+    if (value) {
       this.startCountdown();
     }
   }
@@ -53,6 +52,7 @@ class LifecycleAdditions {
 
   set autoBackgroundDelay(value) {
     this._autoBackgroundDelay = value;
+    
     if (this.autoBackground) {
       this.startCountdown();
     }
@@ -60,7 +60,7 @@ class LifecycleAdditions {
   
   startCountdown() {
     this.stopCountdown();
-    console.log('startCountdown: ' + this._autoBackgroundDelay);
+
     this.countdown = setTimeout(() => {
       if (typeof this._syncTime === 'function') {
         this._syncTime();
