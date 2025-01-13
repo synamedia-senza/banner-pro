@@ -10,7 +10,7 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "senza-sdk": "^4.2.2-00c76af.0",
+    "senza-sdk": "^4.2.2",
     "shaka-player": "^4.12.5"
   }
 }
