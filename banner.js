@@ -1,4 +1,5 @@
 import { init, uiReady, ShakaPlayer, lifecycle } from "senza-sdk";
+import lifecycleAdditions from "./lifecycle-additions.js";
 
 const TEST_VIDEO = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
 
@@ -10,6 +11,13 @@ window.addEventListener("load", async () => {
     player = new ShakaPlayer(video);
     await player.load(TEST_VIDEO);
     await video.play();
+
+    // remove this when player syncs timecode automatically before moving to background
+    lifecycleAdditions.syncTime = () => player.remotePlayer.currentTime = video.currentTime;
+
+    lifecycleAdditions.autoBackgroundDelay = 10;
+    lifecycleAdditions.autoBackground = true;
+
     uiReady();
   } catch (error) {
     console.error(error);
