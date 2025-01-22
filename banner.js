@@ -1,6 +1,5 @@
 import { init, uiReady, ShakaPlayer, lifecycle } from "senza-sdk";
 import lifecycleAdditions from "./lifecycle-additions.js";
-import { Stopwatch } from "./stopwatch.js";
 
 const TEST_VIDEO = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
 
