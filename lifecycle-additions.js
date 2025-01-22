@@ -29,11 +29,6 @@ class LifecycleAdditions {
     });
   }
 
-  // remove this when player syncs timecode automatically before moving to background
-  set syncTime(func) {
-    this._syncTime = func;
-  }
-
   get autoBackground() {
     return this._autoBackground;
   }
@@ -62,9 +57,6 @@ class LifecycleAdditions {
     this.stopCountdown();
 
     this.countdown = setTimeout(() => {
-      if (typeof this._syncTime === 'function') {
-        this._syncTime();
-      }
       lifecycle.moveToBackground();
     }, this.autoBackgroundDelay * 1000);
   }

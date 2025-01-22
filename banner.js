@@ -1,5 +1,6 @@
 import { init, uiReady, ShakaPlayer, lifecycle } from "senza-sdk";
 import lifecycleAdditions from "./lifecycle-additions.js";
+import { Stopwatch } from "./stopwatch.js";
 
 const TEST_VIDEO = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
 
@@ -12,11 +13,9 @@ window.addEventListener("load", async () => {
     await player.load(TEST_VIDEO);
     await video.play();
 
-    // remove this when player syncs timecode automatically before moving to background
-    lifecycleAdditions.syncTime = () => player.remotePlayer.currentTime = video.currentTime;
-
     lifecycleAdditions.autoBackgroundDelay = 10;
     lifecycleAdditions.autoBackground = true;
+    lifecycle.addEventListener("onstatechange", updateBanner);
 
     uiReady();
   } catch (error) {
@@ -39,9 +38,6 @@ async function toggleBackground() {
   if (lifecycle.state == lifecycle.UiState.BACKGROUND) {
     await lifecycle.moveToForeground();
   } else {
-    // remove this line once the remotePlayer has been updated to sync 
-    // automatically regardless of whether seamless switch is enabled
-    player.remotePlayer.currentTime = video.currentTime;
     await lifecycle.moveToBackground();
   }
 }
@@ -56,4 +52,8 @@ async function playPause() {
 
 function skip(seconds) {
   video.currentTime = video.currentTime + seconds;
+}
+
+function updateBanner() {
+  banner.style.opacity = lifecycle.state === lifecycle.UiState.IN_TRANSITION_TO_BACKGROUND ? 0.5 : 0.9;
 }
