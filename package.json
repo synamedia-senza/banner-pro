@@ -11,6 +11,5 @@
   },
   "dependencies": {
     "senza-sdk": "^4.2.6",
-    "shaka-player": "^4.12.5"
   }
 }
