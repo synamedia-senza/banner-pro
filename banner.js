@@ -8,7 +8,8 @@ let player;
 window.addEventListener("load", async () => {
   try {
     await init();
-    player = new ShakaPlayer(video);
+    player = new ShakaPlayer();
+    await player.attach(video);
     await player.load(TEST_VIDEO);
     await video.play();
 
