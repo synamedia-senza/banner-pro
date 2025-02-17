@@ -1,5 +1,4 @@
 import { init, uiReady, ShakaPlayer, lifecycle } from "senza-sdk";
-import lifecycleAdditions from "./lifecycle-additions.js";
 
 const TEST_VIDEO = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
 
@@ -13,8 +12,8 @@ window.addEventListener("load", async () => {
     await player.load(TEST_VIDEO);
     await video.play();
 
-    lifecycleAdditions.autoBackgroundDelay = 10;
-    lifecycleAdditions.autoBackground = true;
+    lifecycle.autoBackgroundDelay = 10;
+    lifecycle.autoBackground = true;
     lifecycle.addEventListener("onstatechange", updateBanner);
 
     uiReady();
