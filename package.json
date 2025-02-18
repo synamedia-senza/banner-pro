@@ -10,6 +10,6 @@
     "webpack-cli": "^4.9.2"
   },
   "dependencies": {
-    "senza-sdk": "4.2.15-ae813a9.0"
+    "senza-sdk": "^4.2.16"
   }
 }
