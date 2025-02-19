@@ -11,6 +11,11 @@ window.addEventListener("load", async () => {
     await player.attach(video);
     await player.load(TEST_VIDEO);
     await video.play();
+
+    lifecycle.autoBackgroundDelay = 15;
+    lifecycle.autoBackground = true;
+    lifecycle.addEventListener("onstatechange", updateBanner);
+
     uiReady();
   } catch (error) {
     console.error(error);
@@ -46,4 +51,8 @@ async function playPause() {
 
 function skip(seconds) {
   video.currentTime = video.currentTime + seconds;
+}
+
+function updateBanner() {
+  banner.style.opacity = lifecycle.state === lifecycle.UiState.IN_TRANSITION_TO_BACKGROUND ? 0.5 : 0.9;
 }
