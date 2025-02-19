@@ -12,7 +12,7 @@ window.addEventListener("load", async () => {
     await player.load(TEST_VIDEO);
     await video.play();
 
-    lifecycle.autoBackgroundDelay = 10;
+    lifecycle.autoBackgroundDelay = 15;
     lifecycle.autoBackground = true;
     lifecycle.addEventListener("onstatechange", updateBanner);
 
