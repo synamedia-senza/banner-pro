@@ -1,4 +1,4 @@
-import { init, uiReady, ShakaPlayer, lifecycle } from "senza-sdk";
+import * as senza from "senza-sdk";
 
 const TEST_VIDEO = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
 
@@ -6,17 +6,18 @@ let player;
 
 window.addEventListener("load", async () => {
   try {
-    await init();
-    player = new ShakaPlayer();
+    await senza.init();
+    player = new senza.ShakaPlayer();
     await player.attach(video);
+
     await player.load(TEST_VIDEO);
     await video.play();
 
-    lifecycle.autoBackgroundDelay = 15;
-    lifecycle.autoBackground = true;
-    lifecycle.addEventListener("onstatechange", updateBanner);
+    senza.lifecycle.autoBackgroundDelay = 10;
+    senza.lifecycle.autoBackground = true;
+    senza.lifecycle.addEventListener("onstatechange", updateBanner);
 
-    uiReady();
+    senza.uiReady();
   } catch (error) {
     console.error(error);
   }
@@ -34,10 +35,10 @@ document.addEventListener("keydown", async function (event) {
 });
 
 async function toggleBackground() {
-  if (lifecycle.state == lifecycle.UiState.BACKGROUND) {
-    await lifecycle.moveToForeground();
+  if (senza.lifecycle.state == senza.lifecycle.UiState.BACKGROUND) {
+    await senza.lifecycle.moveToForeground();
   } else {
-    await lifecycle.moveToBackground();
+    await senza.lifecycle.moveToBackground();
   }
 }
 
@@ -54,5 +55,5 @@ function skip(seconds) {
 }
 
 function updateBanner() {
-  banner.style.opacity = lifecycle.state === lifecycle.UiState.IN_TRANSITION_TO_BACKGROUND ? 0.5 : 0.9;
+  banner.style.opacity = senza.lifecycle.state === senza.lifecycle.UiState.IN_TRANSITION_TO_BACKGROUND ? 0.5 : 0.9;
 }
