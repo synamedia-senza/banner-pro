@@ -1,6 +1,11 @@
 import * as senza from "senza-sdk";
 
-const TEST_VIDEO = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
+let config = {
+  "url": getConfig("url", "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd"),
+  "licenseServer": getConfig("licenseServer", null),
+  "autoBackground": getConfig("autoBackground", "true") == "true",
+  "delay": Number(getConfig("delay", 15))
+}
 
 let player;
 
@@ -9,12 +14,15 @@ window.addEventListener("load", async () => {
     await senza.init();
     player = new senza.ShakaPlayer();
     await player.attach(video);
+    if (config.licenseServer) {
+      player.configure({drm: {servers: {"com.widevine.alpha": config.licenseServer}}});
+    }
 
-    await player.load(TEST_VIDEO);
+    await player.load(config.url);
     await video.play();
 
-    senza.lifecycle.autoBackgroundDelay = 10;
-    senza.lifecycle.autoBackground = true;
+    senza.lifecycle.autoBackgroundDelay = config.delay;
+    senza.lifecycle.autoBackground = config.autoBackground;
     senza.lifecycle.addEventListener("onstatechange", updateBanner);
 
     senza.uiReady();
@@ -56,4 +64,9 @@ function skip(seconds) {
 
 function updateBanner() {
   banner.style.opacity = senza.lifecycle.state === senza.lifecycle.UiState.IN_TRANSITION_TO_BACKGROUND ? 0.5 : 0.9;
+}
+
+function getConfig(name, defaultValue = null) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.has(name) ? urlParams.get(name) : defaultValue;
 }
