@@ -1,22 +1,29 @@
-import { init, uiReady, ShakaPlayer, lifecycle } from "senza-sdk";
+import * as senza from "senza-sdk";
 
-const TEST_VIDEO = "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd";
+let options = {
+  "url": getParam("url", "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd"),
+  "licenseServer": getParam("licenseServer", null),
+  "autoBackground": getParam("autoBackground", "true") == "true",
+  "delay": Number(getParam("delay", 15)),
+  "maxHeight": Number(getParam("maxHeight", 1080))
+}
 
 let player;
 
 window.addEventListener("load", async () => {
   try {
-    await init();
-    player = new ShakaPlayer();
+    await senza.init();
+    player = new senza.ShakaPlayer();
+    player.configure(playerConfig());
     await player.attach(video);
-    await player.load(TEST_VIDEO);
+    await player.load(options.url);
     await video.play();
 
-    lifecycle.autoBackgroundDelay = 15;
-    lifecycle.autoBackground = true;
-    lifecycle.addEventListener("onstatechange", updateBanner);
+    senza.lifecycle.autoBackgroundDelay = options.delay;
+    senza.lifecycle.autoBackground = options.autoBackground;
+    senza.lifecycle.addEventListener("onstatechange", updateBanner);
 
-    uiReady();
+    senza.uiReady();
   } catch (error) {
     console.error(error);
   }
@@ -34,10 +41,10 @@ document.addEventListener("keydown", async function (event) {
 });
 
 async function toggleBackground() {
-  if (lifecycle.state == lifecycle.UiState.BACKGROUND) {
-    await lifecycle.moveToForeground();
+  if (senza.lifecycle.state == senza.lifecycle.UiState.BACKGROUND) {
+    await senza.lifecycle.moveToForeground();
   } else {
-    await lifecycle.moveToBackground();
+    await senza.lifecycle.moveToBackground();
   }
 }
 
@@ -54,5 +61,18 @@ function skip(seconds) {
 }
 
 function updateBanner() {
-  banner.style.opacity = lifecycle.state === lifecycle.UiState.IN_TRANSITION_TO_BACKGROUND ? 0.5 : 0.9;
+  banner.style.opacity = senza.lifecycle.state === senza.lifecycle.UiState.IN_TRANSITION_TO_BACKGROUND ? 0.5 : 0.9;
+}
+
+function getParam(name, defaultValue = null) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.has(name) ? urlParams.get(name) : defaultValue;
+}
+
+function playerConfig() {
+  let config = {abr: {restrictions: {maxHeight: options.maxHeight}}};
+  if (options.licenseServer) {
+    config.drm = {servers: {"com.widevine.alpha": options.licenseServer}};
+  }
+  return config;
 }
