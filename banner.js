@@ -65,8 +65,8 @@ function updateBanner() {
 }
 
 function getParam(name, defaultValue = null) {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.has(name) ? urlParams.get(name) : defaultValue;
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.has(name) ? urlParams.get(name) : defaultValue;
 }
 
 function playerConfig() {
