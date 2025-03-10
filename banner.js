@@ -1,10 +1,11 @@
 import * as senza from "senza-sdk";
 
-let config = {
-  "url": getConfig("url", "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd"),
-  "licenseServer": getConfig("licenseServer", null),
-  "autoBackground": getConfig("autoBackground", "true") == "true",
-  "delay": Number(getConfig("delay", 15))
+let options = {
+  "url": getParam("url", "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd"),
+  "licenseServer": getParam("licenseServer", null),
+  "autoBackground": getParam("autoBackground", "true") == "true",
+  "delay": Number(getParam("delay", 15)),
+  "maxWidth": Number(getParam("maxWidth", 1920))
 }
 
 let player;
@@ -13,16 +14,13 @@ window.addEventListener("load", async () => {
   try {
     await senza.init();
     player = new senza.ShakaPlayer();
+    player.configure(playerConfig());
     await player.attach(video);
-    if (config.licenseServer) {
-      player.configure({drm: {servers: {"com.widevine.alpha": config.licenseServer}}});
-    }
-
-    await player.load(config.url);
+    await player.load(options.url);
     await video.play();
 
-    senza.lifecycle.autoBackgroundDelay = config.delay;
-    senza.lifecycle.autoBackground = config.autoBackground;
+    senza.lifecycle.autoBackgroundDelay = options.delay;
+    senza.lifecycle.autoBackground = options.autoBackground;
     senza.lifecycle.addEventListener("onstatechange", updateBanner);
 
     senza.uiReady();
@@ -66,7 +64,15 @@ function updateBanner() {
   banner.style.opacity = senza.lifecycle.state === senza.lifecycle.UiState.IN_TRANSITION_TO_BACKGROUND ? 0.5 : 0.9;
 }
 
-function getConfig(name, defaultValue = null) {
+function getParam(name, defaultValue = null) {
     const urlParams = new URLSearchParams(window.location.search);
     return urlParams.has(name) ? urlParams.get(name) : defaultValue;
+}
+
+function playerConfig() {
+  let config = {abr: {restrictions: {maxWidth: options.maxWidth}}};
+  if (options.licenseServer) {
+    config.drm = {servers: {"com.widevine.alpha": options.licenseServer}};
+  }
+  return config;
 }
