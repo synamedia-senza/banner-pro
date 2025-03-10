@@ -5,7 +5,7 @@ let options = {
   "licenseServer": getParam("licenseServer", null),
   "autoBackground": getParam("autoBackground", "true") == "true",
   "delay": Number(getParam("delay", 15)),
-  "maxWidth": Number(getParam("maxWidth", 1920))
+  "maxHeight": Number(getParam("maxHeight", 1080))
 }
 
 let player;
@@ -70,7 +70,7 @@ function getParam(name, defaultValue = null) {
 }
 
 function playerConfig() {
-  let config = {abr: {restrictions: {maxWidth: options.maxWidth}}};
+  let config = {abr: {restrictions: {maxHeight: options.maxHeight}}};
   if (options.licenseServer) {
     config.drm = {servers: {"com.widevine.alpha": options.licenseServer}};
   }
