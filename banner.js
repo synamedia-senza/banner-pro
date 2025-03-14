@@ -8,7 +8,7 @@ let options = {
   "auth": getParam("auth", "no_auth"),
   "url": "https://d75lt43xddusd.cloudfront.net/shaka-demo-assets/sintel-widevine/dash.mpd",
   "licenseServer": "https://cwip-shaka-proxy.appspot.com/no_auth",
-  "autoBackground": getParam("autoBackground", "true") == "true",
+  "autoBackground": getParam("autoBackground", "false") == "true",
   "delay": Number(getParam("delay", 15)),
   "maxHeight": Number(getParam("maxHeight", 1080))
 }
