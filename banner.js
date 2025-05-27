@@ -4,7 +4,7 @@ let options = {
   "url": getParam("url", "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd"),
   "licenseServer": getParam("licenseServer", null),
   "autoBackground": getParam("autoBackground", "true") == "true",
-  "timeout": Number(getParam("timeout", 15)),
+  "delay": Number(getParam("delay", 15)),
   "maxHeight": Number(getParam("maxHeight", 1080)),
   "time": Number(getParam("time", 0)),
   "audio": getParam("audio", null),
@@ -31,7 +31,7 @@ window.addEventListener("load", async () => {
     });
 
     senza.lifecycle.autoBackground = options.autoBackground;
-    senza.lifecycle.autoBackgroundDelay = options.timeout;
+    senza.lifecycle.autoBackgroundDelay = options.delay;
     senza.lifecycle.addEventListener("onstatechange", updateBanner);
 
     senza.uiReady();
