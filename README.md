@@ -2,7 +2,7 @@
 
 This app demonstrates how to play video using the Senza version of the Shaka player, which handles integration with the remote player. After a few seconds of inactivity, it automatically switches from foreground to background mode.
 
-This pro version of the [https://github.com/synamedia-senza/banner](banner) app loads the Senza SDK from an NPM package, supports protected content and subtitles, and has a number of customization options. 
+This pro version of the [banner](https://github.com/synamedia-senza/banner) app loads the Senza SDK from an NPM package, supports protected content and subtitles, and has a number of customization options.
 
 See the [Playing Video](https://developer.synamedia.com/senza/docs/playing-video) tutorial in the Senza developer documentation.
 
