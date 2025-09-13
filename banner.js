@@ -1,10 +1,11 @@
 import * as senza from "senza-sdk";
+import Stopwatch from "./stopwatch.js";
 
 let options = {
   "url": getParam("url", "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd"),
   "licenseServer": getParam("licenseServer", null),
   "autoBackground": getParam("autoBackground", "true") == "true",
-  "delay": Number(getParam("delay", 15)),
+  "timeout": Number(getParam("timeout", 15)),
   "maxHeight": Number(getParam("maxHeight", 1080)),
   "time": Number(getParam("time", 0)),
   "audio": getParam("audio", null),
@@ -12,10 +13,14 @@ let options = {
 }
 
 let player;
+let stopwatch;
 
 window.addEventListener("load", async () => {
   try {
     await senza.init();
+
+    stopwatch = new Stopwatch();
+
     player = new senza.ShakaPlayer();
     player.configure(playerConfig());
     await player.attach(video);
@@ -23,16 +28,10 @@ window.addEventListener("load", async () => {
     await video.play();
 
     if (options.time) video.currentTime = options.time;
-    player.remotePlayer.addEventListener("tracksupdate", () => {
-      if (options.audio) player.selectAudioLanguage(options.audio);
-      if (options.text) player.selectTextLanguage(options.text);
-      if (options.text) banner.style.opacity = 0;
-      player.setTextTrackVisibility(options.text != null);
-    });
 
-    senza.lifecycle.autoBackground = options.autoBackground;
-    senza.lifecycle.autoBackgroundDelay = options.delay;
+    senza.lifecycle.configure(lifecycleConfig());
     senza.lifecycle.addEventListener("onstatechange", updateBanner);
+    senza.remotePlayer.addEventListener("tracksupdate", updateTracks);
 
     senza.uiReady();
   } catch (error) {
@@ -81,6 +80,20 @@ function updateBanner() {
 function getParam(name, defaultValue = null) {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.has(name) ? urlParams.get(name) : defaultValue;
+}
+
+function updateTracks() {
+  if (options.audio) player.selectAudioLanguage(options.audio);
+  if (options.text) player.selectTextLanguage(options.text);
+  if (options.text) banner.style.opacity = 0;
+  player.setTextTrackVisibility(options.text != null);
+}
+
+function lifecycleConfig() {
+  return {autoBackground: {
+    enabled: options.autoBackground,
+    timeout: {playing: options.timeout, idle: options.timeout}
+  }};
 }
 
 function playerConfig() {
