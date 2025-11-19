@@ -5,6 +5,12 @@ export default class Stopwatch {
     this.interval = null;
     this.restore();
     
+    senza.lifecycle.addEventListener("beforestatechange", async (event) => {
+      if (event.state === "background") {
+        await this.willMoveToBackground();
+      }
+    });
+
     senza.lifecycle.addEventListener("onstatechange", (event) => {
       if (event.state === "background") {
         this.movedToBackground();
@@ -12,7 +18,7 @@ export default class Stopwatch {
         this.movedToForeground();
       }
     });
-    
+
     this.createBanner();
     this.start();
   }
@@ -22,7 +28,7 @@ export default class Stopwatch {
     this.background = parseInt(sessionStorage.getItem("stopwatch/background")) || 0;
     this.backgroundTime = parseInt(sessionStorage.getItem("stopwatch/backgroundTime")) || 0;
   }
-  
+
   save() {
     sessionStorage.setItem("stopwatch/foreground", `${this.foreground}`);
     sessionStorage.setItem("stopwatch/background", `${this.background}`);
@@ -51,6 +57,11 @@ export default class Stopwatch {
     this.start();
   }
 
+  async willMoveToBackground() {
+    this.banner.style.color = 'red';
+    await this.sleep(0.025);
+  }
+
   movedToBackground() {
     this.banner.style.color = 'red';
     this.backgroundTime = Date.now();
@@ -61,7 +72,7 @@ export default class Stopwatch {
   createBanner() {
     this.banner = document.createElement('div');
     this.banner.style.position = 'fixed';
-    this.banner.style.top = '0';
+    this.banner.style.top = '100px';
     this.banner.style.left = '0';
     this.banner.style.backgroundColor = 'rgba(0, 0, 0, 0.4)';
     this.banner.style.color = 'white';
@@ -81,14 +92,18 @@ export default class Stopwatch {
     this.banner.innerHTML += `Background: ${this.formatTime(this.background)}<br>`;
     this.banner.innerHTML += `${'&nbsp;'.repeat(4)} Ratio: ${ratio.toFixed(2)}%`;
   }
-  
+
   formatTime(seconds) {
     const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    return String(hours) + ':' + 
-      String(minutes).padStart(2, '0') + ':' + 
+    return String(hours) + ':' +
+      String(minutes).padStart(2, '0') + ':' +
       String(secs).padStart(2, '0');
+  }
+
+  async sleep(seconds) {
+    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
   }
 }
 
