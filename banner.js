@@ -61,14 +61,6 @@ window.addEventListener("load", async () => {
   }
 });
 
-function getVideoMetadata(url) {
-  return {
-    "itemId": "bbb_30fps",
-    "itemName": "Big Buck Bunny",
-    "contentType": "Animation"
-  };
-}
-
 document.addEventListener("keydown", async function (event) {
   switch (event.key) {
     case "Enter": await toggleBackground(); break;
