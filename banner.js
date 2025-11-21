@@ -1,6 +1,4 @@
 import * as senza from "senza-sdk";
-
-import { googleAnalyticsId, ipDataAPIKey} from './config.js';
 import analytics from './analytics.js';
 
 let options = {
@@ -26,9 +24,17 @@ window.addEventListener("load", async () => {
     player.configure(playerConfig());
     await player.attach(video);
 
+    let config = {};
+    try {
+      const module = await import("./config.json", {assert: {type: "json"}});
+      config = module.default;
+    } catch (error) {
+      console.warn("config.json not found");
+    }
+
     await analytics.init("Banner Pro", {
-      google: {gtag: googleAnalyticsId, debug: true},
-      ipdata: {apikey: ipDataAPIKey},
+      google: {gtag: config.googleAnalyticsId, debug: true},
+      ipdata: {apikey: config.ipDataAPIKey},
       userInfo: {username: "andrewzc"},
       lifecycle: {raw: false, summary: true},
       player: {raw: false, summary: true}
