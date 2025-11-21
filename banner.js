@@ -1,5 +1,7 @@
 import * as senza from "senza-sdk";
-import Stopwatch from "./stopwatch.js";
+
+import { googleAnalyticsId, ipDataAPIKey} from './config.js';
+import analytics from './analytics.js';
 
 let options = {
   "url": getParam("url", "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd"),
@@ -15,17 +17,29 @@ let options = {
 }
 
 let player;
-let stopwatch;
 
 window.addEventListener("load", async () => {
   try {
     await senza.init();
 
-    stopwatch = new Stopwatch();
-
     player = new senza.ShakaPlayer();
     player.configure(playerConfig());
     await player.attach(video);
+
+    await analytics.init("Banner Pro", {
+      google: {gtag: googleAnalyticsId, debug: true},
+      ipdata: {apikey: ipDataAPIKey},
+      userInfo: {username: "andrewzc"},
+      lifecycle: {raw: false, summary: true},
+      player: {raw: false, summary: true}
+    });
+    analytics.trackPlayerEvents(player, video, {
+      contentId: "bbb_30fps",
+      title: "Big Buck Bunny",
+      description: "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself."
+    });
+    analytics.showStopwatch();
+
     await player.load(options.url);
     await video.play();
 
@@ -40,6 +54,14 @@ window.addEventListener("load", async () => {
     console.error(error);
   }
 });
+
+function getVideoMetadata(url) {
+  return {
+    "itemId": "bbb_30fps",
+    "itemName": "Big Buck Bunny",
+    "contentType": "Animation"
+  };
+}
 
 document.addEventListener("keydown", async function (event) {
   switch (event.key) {
