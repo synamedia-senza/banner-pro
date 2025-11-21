@@ -139,7 +139,7 @@ class SenzaAnalytics {
 
   async willMoveToBackground() {
     this.banner.style.color = 'red';
-    await sleep(0.025);
+    await this.sleep(0.025);
   }
 
   movedToBackground() {
@@ -720,6 +720,10 @@ function deepMerge(target, source) {
     }
   }
   return target;
+
+  async function sleep(seconds) {
+    return new Promise(resolve => setTimeout(resolve, seconds * 1000));
+  }
 }
 
 function formatTime(seconds) {
@@ -729,10 +733,6 @@ function formatTime(seconds) {
   return String(hours) + ':' + 
     String(minutes).padStart(2, '0') + ':' + 
     String(secs).padStart(2, '0');
-}
-
-async function sleep(seconds) {
-  return new Promise(resolve => setTimeout(resolve, seconds * 1000));
 }
 
 // Helper: run metaForLoad safely (sync or async), always returns an object
