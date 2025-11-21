@@ -14,6 +14,8 @@ You can configure the app's behavior using these query parameters:
 * licenseServer - the license server for protected content (default = null)
 * autoBackground - switch to background automatically after a period of inactivty (default = true)
 * timeout - how many seconds to wait before switching to background (default = 15)
+* autoSuspend - switch to suspended automatically after a period of inactivty (default = false)
+* suspendTimeout - how many seconds to wait before switching to suspended (default = 60)
 * maxHeight - the maximum resolution of the video (default = 1080)
 * time - start the video this many seconds from the backgroundeginning (default = 0)
 * audio - langauge code for audio (default = null)

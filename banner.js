@@ -6,6 +6,8 @@ let options = {
   "licenseServer": getParam("licenseServer", null),
   "autoBackground": getParam("autoBackground", "true") == "true",
   "timeout": Number(getParam("timeout", 15)),
+  "autoSuspend": getParam("autoSuspend", "false") == "true",
+  "suspendTimeout": Number(getParam("suspendTimeout", 60)),
   "maxHeight": Number(getParam("maxHeight", 1080)),
   "time": Number(getParam("time", 0)),
   "audio": getParam("audio", null),
@@ -90,10 +92,16 @@ function updateTracks() {
 }
 
 function lifecycleConfig() {
-  return {autoBackground: {
-    enabled: options.autoBackground,
-    timeout: {playing: options.timeout, idle: options.timeout}
-  }};
+  return {
+    autoBackground: {
+      enabled: options.autoBackground,
+      timeout: {playing: options.timeout, idle: options.timeout}
+    },
+    autoSuspend: {
+      enabled: options.autoSuspend,
+      timeout: {playing: options.suspendTimeout, idle: options.suspendTimeout}
+    }
+  };
 }
 
 function playerConfig() {
