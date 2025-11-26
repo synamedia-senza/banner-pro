@@ -37,7 +37,8 @@ window.addEventListener("load", async () => {
       ipdata: {apikey: config.ipDataAPIKey},
       userInfo: {username: "andrewzc"},
       lifecycle: {raw: false, summary: true},
-      player: {raw: false, summary: true}
+      player: {raw: false, summary: true},
+      disconnect: {delay: 10}
     });
     analytics.trackPlayerEvents(player, video, {
       contentId: "bbb_30fps",
@@ -95,7 +96,6 @@ function skip(seconds) {
 }
 
 function updateBanner() {
-  console.log("onstatechange", senza.lifecycle.state);
   banner.style.opacity = senza.lifecycle.state === senza.lifecycle.UiState.IN_TRANSITION_TO_BACKGROUND ? 0.5 : 0.9;
 }
 
