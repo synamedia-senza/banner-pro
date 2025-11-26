@@ -14,7 +14,8 @@ class SenzaAnalytics {
     ipdata: {apikey: null},
     userInfo: {},
     lifecycle: {raw: false, summary: true},
-    player: {raw: false, summary: true}
+    player: {raw: false, summary: true},
+    disconnect: {delay: 0}
   };
 
   constructor() {
@@ -40,6 +41,11 @@ class SenzaAnalytics {
     senza.lifecycle.addEventListener("userdisconnected", async () => {
       await this.playerSessionEnd("session_end", { awaitDelivery: true });
       await this.lifecycleSessionEnd();
+
+      if (this.config.disconnect.delay > 0) {
+        console.log(`Disconnecting in ${this.config.disconnect.delay} seconds...`);
+        await this.sleep(this.config.disconnect.delay);
+      }
     });
 
     this.createBanner();
@@ -95,10 +101,9 @@ class SenzaAnalytics {
   logEvent(eventName, data = {}) {
     data = {...data,
       debug_mode: this.config.google.debug,
-      transport_type: 'beacon',
     };
     gtag('event', eventName, data)
-    console.log('event', eventName, data);
+    console.log('analytics.logEvent', eventName, data);
   }
 
   //// LIFECYCLE ////
@@ -177,6 +182,7 @@ class SenzaAnalytics {
           setTimeout(resolve, 3000);
         };
         message.event_timeout = 5000;
+        message.transport_type = 'beacon';
         this.logEvent("lifecycle_session_end", message);
       } else {
         resolve();
@@ -290,7 +296,7 @@ class SenzaAnalytics {
           state: "playing",
           current_time: media.currentTime || 0,
           src: this._playerSession.url(),
-          ...snakeMeta(this._playerSession.meta),
+          // ...snakeMeta(this._playerSession.meta),
         });
       }
     };
@@ -307,7 +313,7 @@ class SenzaAnalytics {
           state,
           current_time: media.currentTime || 0,
           src: this._playerSession.url(),
-          ...snakeMeta(this._playerSession.meta),
+          // ...snakeMeta(this._playerSession.meta),
         });
       }
     };
@@ -319,7 +325,7 @@ class SenzaAnalytics {
         this.logEvent("player_seek", {
           current_time: media.currentTime || 0,
           src: this._playerSession.url(),
-          ...snakeMeta(this._playerSession.meta),
+          // ...snakeMeta(this._playerSession.meta),
         });
       }
     };
@@ -329,7 +335,7 @@ class SenzaAnalytics {
         this.logEvent("player_seeked", {
           current_time: media.currentTime || 0,
           src: this._playerSession.url(),
-          ...snakeMeta(this._playerSession.meta),
+          // ...snakeMeta(this._playerSession.meta),
         });
       }
     };
@@ -346,10 +352,11 @@ class SenzaAnalytics {
         remote: null,
         sent: false,
         url: () =>
-          media.currentSrc ||
+          player.getAssetUri?.() ||
           initialMeta.src ||
           initialMeta.url ||
           urlHint ||
+          media.currentSrc || 
           "",
         meta: { ...initialMeta },
         startedAt: Date.now(),
@@ -397,6 +404,7 @@ class SenzaAnalytics {
             started_at_ms: restored.startedAt,
             watched_ms: restored.watchedMs || 0,
             watched_sec: Math.round((restored.watchedMs || 0) / 1000),
+            transport_type: 'beacon',
             ...snakeMeta(restored.metaSnapshot || {}),
           });
         }
@@ -420,6 +428,8 @@ class SenzaAnalytics {
         if (!Object.keys(this._playerSession.meta || {}).length) {
           this._playerSession.meta = restored.metaSnapshot || {};
         }
+      } else {
+        this.playerSessionStart();
       }
 
       this._restoredPlayerCore = null;
@@ -506,7 +516,7 @@ class SenzaAnalytics {
           state: "playing",
           current_time: this._safeMediaTime(),
           src: this._playerSession.url(),
-          ...snakeMeta(this._playerSession.meta),
+          // ...snakeMeta(this._playerSession.meta),
         });
       }
     };
@@ -523,7 +533,7 @@ class SenzaAnalytics {
           state,
           current_time: this._safeMediaTime(),
           src: this._playerSession.url(),
-          ...snakeMeta(this._playerSession.meta),
+          // ...snakeMeta(this._playerSession.meta),
         });
       }
     };
@@ -574,6 +584,7 @@ class SenzaAnalytics {
             started_at_ms: restored.startedAt,
             watched_ms: restored.watchedMs || 0,
             watched_sec: Math.round((restored.watchedMs || 0) / 1000),
+            transport_type: 'beacon',
             ...snakeMeta(restored.metaSnapshot || {}),
           });
         }
@@ -597,6 +608,8 @@ class SenzaAnalytics {
         if (!Object.keys(this._playerSession.meta || {}).length) {
           this._playerSession.meta = restored.metaSnapshot || {};
         }
+      } else {
+        this.playerSessionStart();
       }
 
       this._restoredPlayerCore = null;
@@ -645,6 +658,17 @@ class SenzaAnalytics {
     };
   }
 
+  playerSessionStart() {
+    const s = this._playerSession;
+    if (!s?.active) return;
+
+    this.logEvent("player_session_start", {
+      src: s.url(),
+      started_at_ms: s.startedAt,
+      ...snakeMeta(s.meta),
+    });
+  }
+
   // Return a Promise; resolve immediately unless caller opts to await delivery.
   playerSessionEnd(reason = "unknown", { awaitDelivery = false, detachListeners = false } = {}) {
     return new Promise((resolve) => {
@@ -662,7 +686,7 @@ class SenzaAnalytics {
           reason,
           current_time: (typeof document !== "undefined" && this._safeMediaTime()) || 0,
           src: s.url(),
-          ...snakeMeta(this._playerSession.meta),
+          // ...snakeMeta(this._playerSession.meta),
         });
       }
 
