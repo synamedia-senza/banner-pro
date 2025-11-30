@@ -1,5 +1,5 @@
 import * as senza from "senza-sdk";
-import Stopwatch from "./stopwatch.js";
+import analytics from './analytics.js';
 
 let options = {
   "url": getParam("url", "https://dash.akamaized.net/akamai/bbb_30fps/bbb_30fps.mpd"),
@@ -15,17 +15,38 @@ let options = {
 }
 
 let player;
-let stopwatch;
 
 window.addEventListener("load", async () => {
   try {
     await senza.init();
 
-    stopwatch = new Stopwatch();
-
     player = new senza.ShakaPlayer();
     player.configure(playerConfig());
     await player.attach(video);
+
+    let config = {};
+    try {
+      const module = await import("./config.json", {assert: {type: "json"}});
+      config = module.default;
+    } catch (error) {
+      console.warn("config.json not found");
+    }
+
+    await analytics.init("Banner Pro", {
+      google: {gtag: config.googleAnalyticsId, debug: true},
+      ipdata: {apikey: config.ipDataAPIKey},
+      userInfo: {username: "andrewzc"},
+      lifecycle: {raw: false, summary: true},
+      player: {raw: false, summary: true},
+      disconnect: {delay: 10}
+    });
+    analytics.trackPlayerEvents(player, video, {
+      contentId: "bbb_30fps",
+      title: "Big Buck Bunny",
+      description: "Big Buck Bunny tells the story of a giant rabbit with a heart bigger than himself."
+    });
+    analytics.showStopwatch();
+
     await player.load(options.url);
     await video.play();
 
@@ -75,7 +96,6 @@ function skip(seconds) {
 }
 
 function updateBanner() {
-  console.log("onstatechange", senza.lifecycle.state);
   banner.style.opacity = senza.lifecycle.state === senza.lifecycle.UiState.IN_TRANSITION_TO_BACKGROUND ? 0.5 : 0.9;
 }
 
