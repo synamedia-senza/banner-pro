@@ -3,11 +3,12 @@ export default class Stopwatch {
   constructor() {
     this.banner = null;
     this.interval = null;
-    this.restore();
     
     senza.lifecycle.addEventListener("beforestatechange", async (event) => {
       if (event.state === "background") {
         await this.willMoveToBackground();
+      } else if (event.state === "suspended" || event.state === undefined) {
+        await this.willMoveToSuspended();
       }
     });
 
@@ -20,19 +21,34 @@ export default class Stopwatch {
     });
 
     this.createBanner();
+    this.restore();
     this.start();
   }
 
-  restore() {
-    this.foreground = parseInt(sessionStorage.getItem("stopwatch/foreground")) || 0;
-    this.background = parseInt(sessionStorage.getItem("stopwatch/background")) || 0;
-    this.backgroundTime = parseInt(sessionStorage.getItem("stopwatch/backgroundTime")) || 0;
+  save() {
+    localStorage.setItem("stopwatch/foreground", `${this.foreground}`);
+    localStorage.setItem("stopwatch/background", `${this.background}`);
+    localStorage.setItem("stopwatch/suspended", `${this.suspended}`);
+    localStorage.setItem("stopwatch/backgroundTime", `${this.backgroundTime}`);
+    localStorage.setItem("stopwatch/suspendedTime", `${this.suspendedTime}`);
   }
 
-  save() {
-    sessionStorage.setItem("stopwatch/foreground", `${this.foreground}`);
-    sessionStorage.setItem("stopwatch/background", `${this.background}`);
-    sessionStorage.setItem("stopwatch/backgroundTime", `${this.backgroundTime}`);
+  restore() {
+    if (senza.lifecycle.connectReason == senza.lifecycle.ConnectReason.INITIAL_CONNECTION) { 
+      this.foreground = 0;
+      this.background = 0;
+      this.suspended = 0;
+      this.backgroundTime = 0;
+      this.suspendedTime = 0;
+    } else {
+      this.foreground = parseInt(localStorage.getItem("stopwatch/foreground")) || 0;
+      this.background = parseInt(localStorage.getItem("stopwatch/background")) || 0;
+      this.suspended = parseInt(localStorage.getItem("stopwatch/suspended")) || 0;
+      this.backgroundTime = parseInt(localStorage.getItem("stopwatch/backgroundTime")) || 0;
+      this.suspendedTime = parseInt(localStorage.getItem("stopwatch/suspendedTime")) || 0;
+      
+      this.accumulate();
+    }
   }
 
   start() {
@@ -49,17 +65,36 @@ export default class Stopwatch {
     clearInterval(this.interval);
   }
 
-  movedToForeground() {
-    setTimeout(() => this.banner.style.color = 'white', 500);
+  accumulate() {
     if (this.backgroundTime) {
-      this.background += Math.ceil((Date.now() - this.backgroundTime) / 1000);
+      if (this.suspendedTime) {
+        this.background += Math.ceil((this.suspendedTime - this.backgroundTime) / 1000);
+        this.suspended += Math.ceil((Date.now() - this.suspendedTime) / 1000);
+      } else {
+        let backgroundSecs = 
+        this.background += Math.ceil((Date.now() - this.backgroundTime) / 1000);
+      }
+      
+      this.backgroundTime = 0;
+      this.suspendedTime = 0;
     }
-    this.start();
   }
 
   async willMoveToBackground() {
     this.banner.style.color = 'red';
     await this.sleep(0.025);
+  }
+
+  async willMoveToSuspended() {
+    this.suspendedTime = Date.now();
+    this.save();
+    await this.sleep(0.025);
+  }
+
+  movedToForeground() {
+    setTimeout(() => this.banner.style.color = 'white', 500);
+    this.accumulate();
+    this.start();
   }
 
   movedToBackground() {
@@ -87,9 +122,10 @@ export default class Stopwatch {
 
   updateBanner() {
     let ratio = this.foreground ? Math.floor(this.foreground /
-      (this.foreground + this.background) * 10000) / 100 : 100;
+      (this.foreground + this.background + this.suspended) * 10000) / 100 : 100;
     this.banner.innerHTML =  `Foreground: ${this.formatTime(this.foreground)}<br>`;
     this.banner.innerHTML += `Background: ${this.formatTime(this.background)}<br>`;
+    this.banner.innerHTML += `&nbsp;Suspended: ${this.formatTime(this.suspended)}<br>`;
     this.banner.innerHTML += `${'&nbsp;'.repeat(4)} Ratio: ${ratio.toFixed(2)}%`;
   }
 

@@ -23,13 +23,19 @@ window.addEventListener("load", async () => {
 
     stopwatch = new Stopwatch();
 
+    let remoteTime = senza.remotePlayer.currentTime;
+
     player = new senza.ShakaPlayer();
     player.configure(playerConfig());
     await player.attach(video);
     await player.load(options.url);
     await video.play();
 
-    if (options.time) video.currentTime = options.time;
+    if (remoteTime) {
+      video.currentTime = remoteTime;
+    } else if (options.time) {
+      video.currentTime = options.time;
+    }
 
     senza.lifecycle.configure(lifecycleConfig());
     senza.lifecycle.addEventListener("onstatechange", updateBanner);
@@ -45,8 +51,8 @@ document.addEventListener("keydown", async function (event) {
   switch (event.key) {
     case "Enter": await toggleBackground(); break;
     case "Escape": await playPause(); break;
-    case "ArrowLeft": skip(-30); break;
-    case "ArrowRight": skip(30); break;
+    case "ArrowLeft": await skip(-30); break;
+    case "ArrowRight": await skip(30); break;
     case "ArrowUp": break;
     case "ArrowDown": break;
     default: return;
@@ -70,8 +76,15 @@ async function playPause() {
   }
 }
 
-function skip(seconds) {
+async function skip(seconds) {
+  await moveToForegroundIfNeeded();
   video.currentTime = video.currentTime + seconds;
+}
+
+async function moveToForegroundIfNeeded() {
+  if (senza.lifecycle.state == senza.lifecycle.UiState.BACKGROUND) {
+    await senza.lifecycle.moveToForeground();
+  }  
 }
 
 function updateBanner() {
@@ -111,3 +124,4 @@ function playerConfig() {
   }
   return config;
 }
+
